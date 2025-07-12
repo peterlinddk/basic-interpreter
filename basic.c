@@ -115,6 +115,16 @@ void variable_write(char *name, char *newvalue)
 
 char *variable_read(char *name)
 {
+  // search through variables for one with 'name'
+  for(int i=0; i < variables_used; i++)
+  {
+    variable *v = &variables[i];
+    if(strcmp(v->name, name) == 0)
+    {
+      // variable is found!
+      return v->value;
+    }
+  }
   return "null";
 }
 
@@ -176,30 +186,53 @@ void kw_print(char *parm)
 
   // create a new string to print
   char string[255] = "";
+  char *str = string;
 
   // find start of string in input
   char *input = parm;
-  while (*input++ != '"')
-    ;
-  input++; // ignore the first "
-
-  // add each character to the string
-  char *str = string;
-  while (*input != '"')
+  if(*input != '"') 
   {
-    if (*input != '\\')
+    // it is a variable name!
+    char name[255] = "";
+    char *nam = name;
+    while (*input != '\0')
     {
-      *str++ = *input++;
+      *nam++ = *input++;
     }
-    else
+    // remove trailing whitespace, if any
+    while (*(nam - 1) == ' ' || *(nam - 1) == '\t')
     {
-      // character was \ - read next character
-      input++;
-      *str++ = escapeChar(*input++);
+      nam--;
     }
+    *nam = '\0';
+
+//    printf("PRINT variable named '%s': _%s_\n", name, variable_read(name));
+    char *value = variable_read(name);
+    while(*value != '\0')
+      *str++ = *value++;
+  } 
+  else
+  {
+    // it is a string
+    input++; // ignore the first "
+
+    // add each character to the string
+    while (*input != '"')
+    {
+      if (*input != '\\')
+      {
+        *str++ = *input++;
+      }
+      else
+      {
+        // character was \ - read next character
+        input++;
+        *str++ = escapeChar(*input++);
+      }
+    }
+    // make sure to terminate the string
+    *str = '\0';
   }
-  // make sure to terminate the string
-  *str = '\0';
 
   // print string
   printf("%s", string);
