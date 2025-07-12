@@ -3,6 +3,8 @@
 #include <ctype.h>
 
 int startsWithIgnoreCase(char *string, const char *word);
+char escapeChar(char c);
+
 void kw_let(char *parameter);
 void kw_print(char *parameter);
 void kw_input(char *parameter);
@@ -83,29 +85,66 @@ void kw_print(char *parm)
 {
   // ignore whitespace in parameter
   while (*parm == ' ' || *parm == '\t')
-      parm++;
+    parm++;
 
   printf("PRINT %s\n", parm);
 
-  // find start and end of string
-  char* start = parm;
-  while(*start != '"') start++;
-  start++;
-  char* end = start;
-  while(*end != '"') end++;
+  // create a new string to print
+  char string[255] = "";
 
-  // print string between start and end
-  *end = '\0';
-  printf("String: %s", start);
-/*  while(start < end)
+  // find start of string in input
+  char *input = parm;
+  while (*input++ != '"');  
+  input++; // ignore the first "
+
+  // add each character to the string
+  char *str = string;
+  while (*input != '"')
   {
-    putchar(*start);
-    start++;
+    if (*input != '\\')
+    {
+      *str++ = *input++;
+    }
+    else
+    {
+      // character was \ - read next character
+      input++;
+      *str++ = escapeChar(*input++);
+    }
   }
-    */
+  // make sure to terminate the string
+  *str = '\0';
+
+  // print string
+  printf("%s", string);
 }
 
 void kw_input(char *parm)
 {
   printf("INPUT %s\n", parm);
+}
+
+char escapeChar(char c)
+{
+  switch (c)
+  {
+  case 'b':
+    return '\b';
+  case 'f':
+    return '\f';
+  case 'n':
+    return '\n';
+  case 'r':
+    return '\r';
+  case 't':
+    return '\t';
+  case '\\':
+    return '\\';
+  case '\'':
+    return '\'';
+  case '\"':
+    return '\"';
+  default:
+    return c;
+  }
 }
