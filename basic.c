@@ -79,6 +79,46 @@ int startsWithIgnoreCase(char *string, const char *word)
 void kw_let(char *parm)
 {
   printf("LET %s\n", parm);
+
+  // variable name and value
+  char name[255] = "";
+  char *nam = name;
+  char value[255] = "";
+  char *val = value;
+
+  // ignore whitespace in parameter
+  while (*parm == ' ' || *parm == '\t')
+    parm++;
+  // put everything before the = into name
+  while(*parm != '=')
+  {
+    *nam++ = *parm++;
+  }
+  // remove trailing whitespace from name
+  while(*(nam-1) == ' ' || *(nam-1) == '\t')
+  {
+    nam--;
+  }
+  *nam = '\0';
+
+  parm++;
+  // remove leading whitespace in value
+  while (*parm == ' ' || *parm == '\t')
+    parm++;
+  // and put everything after = into value
+  while(*parm != '\0')
+  {
+    *val++ = *parm++;
+  }
+  // but remove trailing whitespace from value
+  while(*(val-1) == ' ' || *(val-1) == '\t')
+  {
+    val--;
+  }
+  *val = '\0';
+
+  // print variable name and value
+  printf("LET variable: _%s_ be value: _%s_\n", name, value);
 }
 
 void kw_print(char *parm)
