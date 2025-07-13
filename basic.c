@@ -15,6 +15,8 @@ void kw_let(char *parameter);
 void kw_print(char *parameter);
 void kw_input(char *parameter);
 
+void tokenize(char *line);
+
 const char *keywords[] = {"NEW", "LIST", "RUN", "END", "REM", "LET", "PRINT", "INPUT"};
 
 int main()
@@ -148,6 +150,8 @@ void kw_let(char *parm)
 {
   printf("LET %s\n", parm);
 
+  tokenize(parm);
+
   // variable name and value
   char name[255] = "";
   char *nam = name;
@@ -194,6 +198,8 @@ void kw_let(char *parm)
 
 void kw_print(char *parm)
 {
+  tokenize(parm);
+
   // ignore whitespace in parameter
   while (*parm == ' ' || *parm == '\t')
     parm++;
@@ -258,6 +264,8 @@ void kw_input(char *parm)
 {
   printf("INPUT %s\n", parm);
 
+  tokenize(parm);
+
   // ignore leading whitespace in parameter
   while (*parm == ' ' || *parm == '\t')
     parm++;
@@ -320,6 +328,159 @@ void kw_input(char *parm)
   userinput[strlen(userinput) - 1] = '\0';
 
   variable_write(name, userinput);
+}
+
+// ** Tokens **
+typedef enum
+{
+  WHITESPACE,
+  STRING,
+  IDENTIFIER,
+  EQUALS
+} TOKEN_TYPE;
+
+const char *TOKEN_NAMES[] = {
+    "WHITESPACE",
+    "STRING",
+    "IDENTIFIER",
+    "EQUALS"};
+
+typedef struct
+{
+  TOKEN_TYPE type;
+  char *value;
+} Token;
+
+Token TOKEN_equal = {.type = EQUALS, .value = "="};
+
+Token *nextToken(char **line);
+Token *tokenize_whitespace(char **text);
+Token *tokenize_string(char **text);
+Token *tokenize_identifier(char **text);
+void printToken(Token *token);
+
+void tokenize(char *text)
+{
+  printf("TOKENIZE - begin\n================\n");
+
+  Token *token;
+  while (*text != '\0')
+  {
+//    printf(" - remaining text: _%s_\n", text);
+    token = nextToken(&text);
+    printToken(token);
+  }
+
+  printf("TOKENIZE - end\n==============\n");
+}
+
+Token *nextToken(char **text_ptr)
+{
+  Token *token;
+
+  // check next character, and decide what kind of token it is
+  char c = **text_ptr;
+  if (c == ' ' || c == '\t')  // whitespace
+  {
+    token = tokenize_whitespace(text_ptr);
+  }
+  else if (c == '\"')         // string
+  {
+    token = tokenize_string(text_ptr);
+  }
+  else if (c == '=')          // equal
+  {
+    // use global equal token
+    token = &TOKEN_equal;
+    // and advance text_ptr
+    (*text_ptr)++;
+  }
+  else                        // identifier
+  {    
+    token = tokenize_identifier(text_ptr);
+  }
+
+  return token;
+}
+
+void printToken(Token *token)
+{
+  printf("Token:\n type: %s\n value: '%s'\n\n", TOKEN_NAMES[token->type], token->value);
+}
+
+Token *tokenize_whitespace(char **text_ptr)
+{
+  // create new token
+  Token *token = malloc(sizeof(Token));
+  token->type = WHITESPACE;
+
+  char string[255] = "";
+  char *val = string;
+  while (**text_ptr == ' ' || **text_ptr == '\t')
+  {
+    *val++ = *(*text_ptr)++;
+  }
+  *val = '\0';
+  token->value = strdup(string);
+
+  return token;
+}
+
+Token *tokenize_string(char **text_ptr)
+{
+  Token *token = malloc(sizeof(Token));
+  token->type = STRING;
+
+  char string[255] = "";
+  char *val = string;
+
+  (*text_ptr)++;
+  // add each character to the string
+  while (**text_ptr != '"')
+  {
+    if (**text_ptr != '\\')
+    {
+      *val++ = *(*text_ptr)++;
+    }
+    else
+    {
+      // character was \ - read next character
+      (*text_ptr)++;
+      *val++ = escapeChar(*(*text_ptr)++);
+    }
+  }
+  // make sure to terminate the string
+  *val = '\0';
+  // and scroll past the last "
+  (*text_ptr)++;
+
+  token->value = strdup(string);
+
+  return token;
+}
+
+Token *tokenize_identifier(char **text_ptr)
+{
+  Token *token = malloc(sizeof(Token));
+  token->type = IDENTIFIER;
+
+  char string[255] = "";
+  char *val = string;
+  // end with end of text, or a = ... will probably change later!!!
+  while (**text_ptr != '\0' && **text_ptr != '=')
+  {
+    *val++ = *(*text_ptr)++;
+  }
+  // remove trailing whitespace - if any
+  while (*(val - 1) == ' ' || *(val - 1) == '\t')
+  {
+    val--;
+  }
+  // make sure to terminate the string
+  *val = '\0';
+  token->value = strdup(string);
+
+  return token;
 }
 
 char escapeChar(char c)
