@@ -10,4 +10,10 @@ rewrites, as I learn better ways of doing things. In reality I do know about par
 lexers, compilers, regular expressions, BNF grammars and a lot more, but I do not want
 to pretend to be an expert, so I develop everything iteratively, as needed.
 
+Build the project with
+
+```bash
+make basic
+```
+
 The full "documentation" of my exploits is available online: [peterlinddk.notion.site/BASIC-interpreter](https://peterlinddk.notion.site/BASIC-interpreter-22d36f4e0a82809e8907c1f0f2076668)
