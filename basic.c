@@ -39,6 +39,7 @@ typedef struct
 
 TokenList *tokenize(char *line);
 void printToken(Token *token);
+void printToken(Token *token);
 
 const char *keywords[] = {"NEW", "LIST", "RUN", "END", "REM", "LET", "PRINT", "INPUT"};
 
@@ -221,66 +222,27 @@ void kw_let(char *parm)
 
 void kw_print(char *parm)
 {
-  tokenize(parm);
+  //  printf("PRINT %s\n", parm);
 
-  // ignore whitespace in parameter
-  while (*parm == ' ' || *parm == '\t')
-    parm++;
-
-  printf("PRINT %s\n", parm);
-
-  // create a new string to print
-  char string[255] = "";
-  char *str = string;
-
-  // find start of string in input
-  char *input = parm;
-  if (*input != '"')
+  TokenList *tokenlist = tokenize(parm);
+  for (int i = 0; i < tokenlist->length; i++)
   {
-    // it is a variable name!
-    char name[255] = "";
-    char *nam = name;
-    while (*input != '\0')
+    Token *token = tokenlist->tokens[i];
+    if (token->type == WHITESPACE)
     {
-      *nam++ = *input++;
+      // just ignore it
     }
-    // remove trailing whitespace, if any
-    while (*(nam - 1) == ' ' || *(nam - 1) == '\t')
+    else if (token->type == STRING)
     {
-      nam--;
+      // print value
+      printf("%s", token->value);
     }
-    *nam = '\0';
-
-    //    printf("PRINT variable named '%s': _%s_\n", name, variable_read(name));
-    char *value = variable_read(name);
-    while (*value != '\0')
-      *str++ = *value++;
+    else if (token->type == IDENTIFIER)
+    {
+      // find variable with that name - read it and print the value
+      printf("%s", variable_read(token->value));
+    }
   }
-  else
-  {
-    // it is a string
-    input++; // ignore the first "
-
-    // add each character to the string
-    while (*input != '"')
-    {
-      if (*input != '\\')
-      {
-        *str++ = *input++;
-      }
-      else
-      {
-        // character was \ - read next character
-        input++;
-        *str++ = escapeChar(*input++);
-      }
-    }
-    // make sure to terminate the string
-    *str = '\0';
-  }
-
-  // print string
-  printf("%s", string);
 }
 
 void kw_input(char *parm)
