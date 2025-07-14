@@ -466,8 +466,8 @@ Token *tokenize_identifier(char **text_ptr)
 
   char string[255] = "";
   char *val = string;
-  // end with end of text, or a = ... will probably change later!!!
-  while (**text_ptr != '\0' && **text_ptr != '=')
+  // end with end of text, or a = or a " ... will probably change later!!!
+  while (**text_ptr != '\0' && **text_ptr != '=' && **text_ptr != '\"')
   {
     *val++ = *(*text_ptr)++;
   }
