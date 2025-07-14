@@ -23,6 +23,12 @@ typedef enum
   EQUALS
 } TOKEN_TYPE;
 
+const char *TOKEN_NAMES[] = {
+    "WHITESPACE",
+    "STRING",
+    "IDENTIFIER",
+    "EQUALS"};
+
 typedef struct
 {
   TOKEN_TYPE type;
@@ -174,48 +180,59 @@ void kw_let(char *parm)
 {
   printf("LET %s\n", parm);
 
-  tokenize(parm);
+  char *name;
+  char *value;
 
-  // variable name and value
-  char name[255] = "";
-  char *nam = name;
-  char value[255] = "";
-  char *val = value;
+  TokenList *tokenlist = tokenize(parm);
+  // get first token that isn't a whitespace
+  // TODO: Maybe get rid of the tokenlist, and just call nextToken here - expand with nextNonWhitespaceToken - and the possibility of an EndToken of sorts.
+  int i=0;
+  Token* token;
+  do
+  {
+    token = tokenlist->tokens[i++];
+  } while (token->type == WHITESPACE);
+  
+  // Token MUST be an identifier
+  if(token->type != IDENTIFIER)
+  {
+    // TODO: Better error handling
+    printf("SYNTAX ERROR - LET must be followed by identifier\n");
+    return;
+  }
+  name = token->value;
+  
+  // skip whitespace
+  do
+  {
+    token = tokenlist->tokens[i++];
+  } while (token->type == WHITESPACE);
+  
+  // Token MUST be equal
+  if(token->type != EQUALS)
+  {
+    // TODO: Better error handling
+    printf("SYNTAX ERROR - missing equals after identifier\n");
+    return;
+  }
+  
+  // skip whitespace
+  do
+  {
+    token = tokenlist->tokens[i++];
+  } while (token->type == WHITESPACE);
 
-  // ignore whitespace in parameter
-  while (*parm == ' ' || *parm == '\t')
-    parm++;
-  // put everything before the = into name
-  while (*parm != '=')
+  // Last token can be either identifier or string - but don't be too strict about it
+  if(token->type == STRING || token->type == IDENTIFIER)
   {
-    *nam++ = *parm++;
-  }
-  // remove trailing whitespace from name
-  while (*(nam - 1) == ' ' || *(nam - 1) == '\t')
+    value = token->value;
+  } else 
   {
-    nam--;
+    // TODO: Better error handling
+    printf("ERROR? Don't know how to handle token type %s(%s)\n", TOKEN_NAMES[token->type], token->value);
   }
-  *nam = '\0';
 
-  parm++;
-  // remove leading whitespace in value
-  while (*parm == ' ' || *parm == '\t')
-    parm++;
-  // and put everything after = into value
-  while (*parm != '\0')
-  {
-    *val++ = *parm++;
-  }
-  // but remove trailing whitespace from value
-  while (*(val - 1) == ' ' || *(val - 1) == '\t')
-  {
-    val--;
-  }
-  *val = '\0';
-
-  // print variable name and value
-  //  printf("LET variable: _%s_ be value: _%s_\n", name, value);
-  // create variable
+  // store variable name and value
   variable_create(name, value);
   variables_dump();
 }
@@ -316,12 +333,6 @@ void kw_input(char *parm)
 }
 
 // ** Tokens **
-
-const char *TOKEN_NAMES[] = {
-    "WHITESPACE",
-    "STRING",
-    "IDENTIFIER",
-    "EQUALS"};
 
 Token TOKEN_equal = {.type = EQUALS, .value = "="};
 
