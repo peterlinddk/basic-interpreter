@@ -266,62 +266,34 @@ void kw_input(char *parm)
 {
   printf("INPUT %s\n", parm);
 
-  tokenize(parm);
-
-  // ignore leading whitespace in parameter
-  while (*parm == ' ' || *parm == '\t')
-    parm++;
-  char *input = parm;
-  // check if we begin with a string
-  if (*input == '"')
+  TokenList *tokenlist = tokenize(parm);
+  // get first token that isn't a whitespace - just like in kw_let
+  int i=0;
+  Token* token;
+  do
   {
-    // create string
-    char string[255] = "";
-    char *str = string;
+    token = tokenlist->tokens[i++];
+  } while (token->type == WHITESPACE);
 
-    input++; // ignore the first "
-
-    // add each character to the string
-    while (*input != '"')
+  // if the token is a string, use it as a prompt
+  if(token->type == STRING)
+  {
+    printf("%s", token->value);
+    // and skip whitespace
+    do
     {
-      if (*input != '\\')
-      {
-        *str++ = *input++;
-      }
-      else
-      {
-        // character was \ - read next character
-        input++;
-        *str++ = escapeChar(*input++);
-      }
-    }
-    // make sure to terminate the string
-    *str = '\0';
-    // and scroll past the last "
-    input++;
-
-    // print the prompt string
-    printf("%s", string);
+      token = tokenlist->tokens[i++];
+    } while (token->type == WHITESPACE);
   }
 
-  // find variable name - skip leading whitespace
-  while (*input == ' ' || *input == '\t')
-    input++;
-
-  char name[255] = "";
-  char *nam = name;
-  while (*input != '\0')
+  // expect the token to be an identifier
+  if(token->type != IDENTIFIER)
   {
-    *nam++ = *input++;
+    printf("SYNTAX ERROR - expected identifier for INPUT");
+    return;
   }
-  // remove trailing whitespace, if any
-  while (*(nam - 1) == ' ' || *(nam - 1) == '\t')
-  {
-    nam--;
-  }
-  *nam = '\0';
 
-  // printf("INPUT to variable named '%s'\n", name);
+  // use identifier as variable name
   printf("? ");
   char userinput[255] = "";
   fgets(userinput, 255, stdin);
@@ -329,7 +301,7 @@ void kw_input(char *parm)
   // remove last newline
   userinput[strlen(userinput) - 1] = '\0';
 
-  variable_write(name, userinput);
+  variable_write(token->value, userinput);
 }
 
 // ** Tokens **
