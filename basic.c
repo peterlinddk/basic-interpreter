@@ -15,7 +15,30 @@ void kw_let(char *parameter);
 void kw_print(char *parameter);
 void kw_input(char *parameter);
 
-void tokenize(char *line);
+typedef enum
+{
+  WHITESPACE,
+  STRING,
+  IDENTIFIER,
+  EQUALS
+} TOKEN_TYPE;
+
+typedef struct
+{
+  TOKEN_TYPE type;
+  char *value;
+} Token;
+
+typedef struct
+{
+  Token **tokens;
+  int length;
+  int capacity;
+
+} TokenList;
+
+TokenList *tokenize(char *line);
+void printToken(Token *token);
 
 const char *keywords[] = {"NEW", "LIST", "RUN", "END", "REM", "LET", "PRINT", "INPUT"};
 
@@ -331,25 +354,12 @@ void kw_input(char *parm)
 }
 
 // ** Tokens **
-typedef enum
-{
-  WHITESPACE,
-  STRING,
-  IDENTIFIER,
-  EQUALS
-} TOKEN_TYPE;
 
 const char *TOKEN_NAMES[] = {
     "WHITESPACE",
     "STRING",
     "IDENTIFIER",
     "EQUALS"};
-
-typedef struct
-{
-  TOKEN_TYPE type;
-  char *value;
-} Token;
 
 Token TOKEN_equal = {.type = EQUALS, .value = "="};
 
@@ -359,19 +369,40 @@ Token *tokenize_string(char **text);
 Token *tokenize_identifier(char **text);
 void printToken(Token *token);
 
-void tokenize(char *text)
+TokenList *tokenize(char *text)
 {
-  printf("TOKENIZE - begin\n================\n");
+  //  printf("TOKENIZE - begin\n================\n");
 
-  Token *token;
+  // create list of tokens with capacity of 5
+  Token **tokens = malloc(sizeof(Token) * 5);
+  TokenList *tokenlist = malloc(sizeof(TokenList));
+  tokenlist->capacity = 5;
+  tokenlist->length = 0;
+  tokenlist->tokens = tokens;
+
   while (*text != '\0')
   {
-//    printf(" - remaining text: _%s_\n", text);
-    token = nextToken(&text);
-    printToken(token);
+    // check if the list's run out of room
+    if (tokenlist->length >= tokenlist->capacity)
+    {
+      // then double the capacity
+      tokenlist->capacity *= 2;
+      // and reallocate
+      tokenlist->tokens = realloc(tokenlist->tokens, tokenlist->capacity * sizeof(Token));
+    }
+    tokenlist->tokens[tokenlist->length++] = nextToken(&text);
   }
 
-  printf("TOKENIZE - end\n==============\n");
+  // Print the contents of the tokenlist - for testing
+  /*
+  printf("TOKENS in list:\n");
+  for(int i=0; i < tokenlist->length; i++) {
+    printToken(tokenlist->tokens[i]);
+  }
+  */
+
+  //  printf("TOKENIZE - end\n==============\n");
+  return tokenlist;
 }
 
 Token *nextToken(char **text_ptr)
@@ -396,7 +427,7 @@ Token *nextToken(char **text_ptr)
     (*text_ptr)++;
   }
   else                        // identifier
-  {    
+  {
     token = tokenize_identifier(text_ptr);
   }
 
