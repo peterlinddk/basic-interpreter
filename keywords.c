@@ -13,9 +13,9 @@ void kw_let(char *parm)
 
   // get first token that isn't a whitespace
   Token *token = nextTokenIgnoreWhitespace(&parm);
-  
+
   // Token MUST be an identifier
-  if(token->type != IDENTIFIER)
+  if (token->type != IDENTIFIER)
   {
     // TODO: Better error handling
     printf("SYNTAX ERROR - LET must be followed by identifier\n");
@@ -28,21 +28,26 @@ void kw_let(char *parm)
   token = nextTokenIgnoreWhitespace(&parm);
 
   // Token MUST be equal
-  if(token->type != EQUALS)
+  if (token->type != EQUALS)
   {
     // TODO: Better error handling
     printf("SYNTAX ERROR - missing equals after identifier\n");
     return;
   }
-  
+
   // get next token that isn't a whitespace
   token = nextTokenIgnoreWhitespace(&parm);
 
-  // Last token can be either identifier or string - but don't be too strict about it
-  if(token->type == STRING || token->type == IDENTIFIER)
+  // Last token can be either string or number - don't be too strict about it yet
+  if (token->type == STRING || token->type == NUMBER)
   {
     value = token->value;
-  } else 
+  }
+  else if (token->type == IDENTIFIER)
+  {
+    value = variable_read(token->value);
+  }
+  else
   {
     // TODO: Better error handling
     printf("ERROR? Don't know how to handle token type %s(%s)\n", TOKEN_NAMES[token->type], token->value);
@@ -59,11 +64,16 @@ void kw_print(char *parm)
   //  printf("PRINT %s\n", parm);
 
   Token *token = nextToken(&parm);
-  while(token->type != END)
+  while (token->type != END)
   {
     if (token->type == STRING)
     {
       // print value
+      printf("%s", token->value);
+    }
+    else if (token->type == NUMBER)
+    {
+      // print number value
       printf("%s", token->value);
     }
     else if (token->type == IDENTIFIER)
@@ -72,9 +82,9 @@ void kw_print(char *parm)
       printf("%s", variable_read(token->value));
     }
     // other tokens are just ignored for now - meaning not printed at all
-    
+
     token = nextToken(&parm);
-  }  
+  }
 }
 
 void kw_input(char *parm)
