@@ -6,7 +6,8 @@ typedef enum
   WHITESPACE,
   STRING,
   IDENTIFIER,
-  EQUALS
+  EQUALS,
+  END
 } TOKEN_TYPE;
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -14,7 +15,8 @@ static const char *TOKEN_NAMES[] = {
     "WHITESPACE",
     "STRING",
     "IDENTIFIER",
-    "EQUALS"};
+    "EQUALS",
+    "END"};
 
 typedef struct
 {
@@ -33,6 +35,7 @@ typedef struct
 TokenList *tokenize(char *line);
 void printToken(Token *token);
 Token *nextToken(char **line);
+Token *nextTokenIgnoreWhitespace(char **text_ptr);
 Token *tokenize_whitespace(char **text);
 Token *tokenize_string(char **text);
 Token *tokenize_identifier(char **text);

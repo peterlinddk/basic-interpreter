@@ -42,13 +42,31 @@ TokenList *tokenize(char *text)
   return tokenlist;
 }
 
+Token *nextTokenIgnoreWhitespace(char **text_ptr)
+{
+  Token *token;
+
+  // skip whitespace
+  do
+  {
+    token = nextToken(text_ptr);
+  } while (token->type == WHITESPACE);
+
+  // if the token is not a whitespace, return it
+  return token;
+}
+
 Token *nextToken(char **text_ptr)
 {
   Token *token;
 
   // check next character, and decide what kind of token it is
   char c = **text_ptr;
-  if (c == ' ' || c == '\t')  // whitespace
+  if (c == '\0')
+  {
+    token = &TOKEN_end; // use global end token
+  }
+  else if (c == ' ' || c == '\t') // whitespace
   {
     token = tokenize_whitespace(text_ptr);
   }
@@ -116,7 +134,7 @@ Token *tokenize_string(char **text_ptr)
       (*text_ptr)++;
       *val++ = escapeChar(*(*text_ptr)++);
     }
-  }
+  }  
   // make sure to terminate the string
   *val = '\0';
   // and scroll past the last "
