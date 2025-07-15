@@ -122,7 +122,7 @@ Token *tokenize_string(char **text_ptr)
 
   (*text_ptr)++;
   // add each character to the string
-  while (**text_ptr != '"')
+  while (**text_ptr != '\0' && **text_ptr != '"')
   {
     if (**text_ptr != '\\')
     {
@@ -134,7 +134,8 @@ Token *tokenize_string(char **text_ptr)
       (*text_ptr)++;
       *val++ = escapeChar(*(*text_ptr)++);
     }
-  }  
+  }
+  // TODO: Maybe give an error or warning if string wasn't terminated with " ...  
   // make sure to terminate the string
   *val = '\0';
   // and scroll past the last "
