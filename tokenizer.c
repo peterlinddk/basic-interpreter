@@ -96,7 +96,7 @@ Token *nextToken(char **text_ptr)
 
 void printToken(Token *token)
 {
-  printf("Token:\n type: %s\n value: '%s'\n\n", TOKEN_NAMES[token->type], token->value);
+  printf("<%s '%s'> ", TOKEN_NAMES[token->type], token->value);
 }
 
 Token *tokenize_whitespace(char **text_ptr)
@@ -176,11 +176,21 @@ Token *tokenize_identifier(char **text_ptr)
 
   char string[255] = "";
   char *val = string;
-  // end with end of text, or a = or a " ... will probably change later!!!
-  while (**text_ptr != '\0' && **text_ptr != '=' && **text_ptr != '\"')
+  // An identifier can end in several ways:
+  // - with the end of the text, or if it meets any of these characters: = "
+  // - if a digit follows a space, the identifier ended before the digit!
+  int stopped = 0;
+  do
   {
-    *val++ = *(*text_ptr)++;
-  }
+    char c = **text_ptr;
+    if(c == '\0') stopped = 1;
+    if(c == '=' || c == '\"') stopped = 1;
+    if(c == ' ' && isdigit(*(*text_ptr+1))) stopped = 1;
+
+    if(!stopped)
+      *val++ = *(*text_ptr)++;
+  } while(!stopped);
+
   // remove trailing whitespace - if any
   while (isspace(*(val - 1)))
   {
