@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #define DEFINE_TOKEN_NAMES
 #include "tokenizer.h"
@@ -62,13 +63,17 @@ Token *nextToken(char **text_ptr)
 
   // check next character, and decide what kind of token it is
   char c = **text_ptr;
-  if (c == '\0')
+  if (c == '\0')              // end of text
   {
     token = &TOKEN_end; // use global end token
   }
-  else if (c == ' ' || c == '\t') // whitespace
+  else if (isspace(c))        // whitespace
   {
     token = tokenize_whitespace(text_ptr);
+  }
+  else if (isdigit(c))        // number
+  {
+    token = tokenize_number(text_ptr);
   }
   else if (c == '\"')         // string
   {
@@ -102,7 +107,25 @@ Token *tokenize_whitespace(char **text_ptr)
 
   char string[255] = "";
   char *val = string;
-  while (**text_ptr == ' ' || **text_ptr == '\t')
+  while (isspace(**text_ptr))
+  {
+    *val++ = *(*text_ptr)++;
+  }
+  *val = '\0';
+  token->value = strdup(string);
+
+  return token;
+}
+
+Token *tokenize_number(char **text_ptr)
+{
+  // create new token of type number
+  Token *token = malloc(sizeof(Token));
+  token->type = NUMBER;
+
+  char string[255] = "";
+  char *val = string;
+  while (isdigit(**text_ptr))
   {
     *val++ = *(*text_ptr)++;
   }
@@ -159,7 +182,7 @@ Token *tokenize_identifier(char **text_ptr)
     *val++ = *(*text_ptr)++;
   }
   // remove trailing whitespace - if any
-  while (*(val - 1) == ' ' || *(val - 1) == '\t')
+  while (isspace(*(val - 1)))
   {
     val--;
   }
