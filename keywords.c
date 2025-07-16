@@ -3,13 +3,11 @@
 
 #include "tokenizer.h"
 #include "variables.h"
+#include "keywords.h"
 
 void kw_let(char *parm)
 {
   printf("LET %s\n", parm);
-
-  char *name;
-  char *value;
 
   // get first token that isn't a whitespace
   Token *token = nextTokenIgnoreWhitespace(&parm);
@@ -22,7 +20,7 @@ void kw_let(char *parm)
     return;
   }
 
-  name = token->value;
+  char *variable_name = token->value;
 
   // get next token that isn't a whitespace
   token = nextTokenIgnoreWhitespace(&parm);
@@ -38,14 +36,23 @@ void kw_let(char *parm)
   // get next token that isn't a whitespace
   token = nextTokenIgnoreWhitespace(&parm);
 
-  // Last token can be either string or number - don't be too strict about it yet
-  if (token->type == STRING || token->type == NUMBER)
+  char *variable_value = token->value;
+
+  // Last token can be either string or number - or another identifier
+  if (token->type == STRING)
   {
-    value = token->value;
+    createStringVariable(variable_name, variable_value);
+  }
+  else if (token->type == NUMBER)
+  {
+    createIntVariable(variable_name, parseNumber(variable_value));
   }
   else if (token->type == IDENTIFIER)
   {
-    value = variable_read(token->value);
+    // find the variable with this name
+    Variable *v = getVariable(variable_value);
+    // and create a new of same type, with same value, but the name provided earlier
+    createVariable(*v, variable_name);
   }
   else
   {
@@ -54,8 +61,6 @@ void kw_let(char *parm)
     return;
   }
 
-  // store variable name and value
-  variable_create(name, value);
   variables_dump();
 }
 
@@ -78,8 +83,21 @@ void kw_print(char *parm)
     }
     else if (token->type == IDENTIFIER)
     {
-      // find variable with that name - read it and print the value
-      printf("%s", variable_read(token->value));
+      // find variable with that name
+      Variable *v = getVariable(token->value); // TODO: What if variable doesn't exist?
+      //- read it and print the value
+      switch (v->type)
+      {
+      case VAR_TYPE_STRING:
+        printf("%s", v->stringValue);
+        break;
+      case VAR_TYPE_INTEGER:
+        printf("%d", v->intValue);
+        break;
+      case VAR_TYPE_FLOAT:
+        printf("%f", v->floatValue);
+        break;
+      }
     }
     // other tokens are just ignored for now - meaning not printed at all
 
@@ -92,10 +110,10 @@ void kw_input(char *parm)
   printf("INPUT %s\n", parm);
 
   // get first token that isn't a whitespace
-  Token* token = nextTokenIgnoreWhitespace(&parm);
+  Token *token = nextTokenIgnoreWhitespace(&parm);
 
   // if the token is a string, use it as a prompt
-  if(token->type == STRING)
+  if (token->type == STRING)
   {
     printf("%s", token->value);
     // and skip whitespace
@@ -103,19 +121,51 @@ void kw_input(char *parm)
   }
 
   // expect the token to be an identifier
-  if(token->type != IDENTIFIER)
+  if (token->type != IDENTIFIER)
   {
     printf("SYNTAX ERROR - expected identifier for INPUT");
     return;
   }
+  char *variable_name = token->value;
 
-  // use identifier as variable name
+  // get input as string
   printf("? ");
   char userinput[255] = "";
   fgets(userinput, 255, stdin);
-
   // remove last newline
   userinput[strlen(userinput) - 1] = '\0';
 
-  variable_write(token->value, userinput);
+  // check variable-type
+  Variable *v = getVariable(variable_name);
+
+  if (v->type == VAR_TYPE_STRING)
+  {
+    writeStringVariable(variable_name, userinput);
+  }
+  else if (v->type == VAR_TYPE_INTEGER)
+  {
+    // don't trust the user, so tokenize number first
+    char *input_ptr = userinput;
+    Token *input_value = nextTokenIgnoreWhitespace(&input_ptr);
+    if (input_value->type != NUMBER)
+    {
+      printf("TYPE MISMATCH ERROR - expected number, got '%s'\n", input_value->value);
+      return;
+    }
+    writeIntVariable(variable_name, parseNumber(input_value->value));
+  }
+  // TODO: Handle float
+
+  variables_dump();
+}
+
+int parseNumber(char *str)
+{
+  int value = 0;
+  while (*str)
+  {
+    value *= 10; // base 10 is default
+    value += (*str++) - '0';
+  }
+  return value;
 }
