@@ -7,6 +7,8 @@ void kw_let(char *parameter);
 void kw_print(char *parameter);
 void kw_input(char *parameter);
 
+int intValueOfToken(Token *token);
 int parseNumber(char *str);
+
 
 #endif

@@ -36,32 +36,61 @@ void kw_let(char *parm)
   // get next token that isn't a whitespace
   token = nextTokenIgnoreWhitespace(&parm);
 
-  char *variable_value = token->value;
+  // and check if there is another token following that one (maybe a +)
+  Token *next_token = nextTokenIgnoreWhitespace(&parm);
 
-  // Last token can be either string or number - or another identifier
-  if (token->type == STRING)
+  // if not, then we behave as usual, and create a variable with a single value
+  if (next_token->type == END)
   {
-    createStringVariable(variable_name, variable_value);
+    char *variable_value = token->value;
+
+    // Last token can be either string or number - or another identifier
+    if (token->type == STRING)
+    {
+      createStringVariable(variable_name, variable_value);
+    }
+    else if (token->type == NUMBER)
+    {
+      createIntVariable(variable_name, parseNumber(variable_value));
+    }
+    else if (token->type == IDENTIFIER)
+    {
+      // find the variable with this name
+      Variable *v = getVariable(variable_value);
+      // and create a new of same type, with same value, but the name provided earlier
+      createVariable(*v, variable_name);
+    }
   }
-  else if (token->type == NUMBER)
+  else // more tokens follow
   {
-    createIntVariable(variable_name, parseNumber(variable_value));
-  }
-  else if (token->type == IDENTIFIER)
-  {
-    // find the variable with this name
-    Variable *v = getVariable(variable_value);
-    // and create a new of same type, with same value, but the name provided earlier
-    createVariable(*v, variable_name);
-  }
-  else
-  {
-    // TODO: Better error handling
-    printf("ERROR? Don't know how to handle token type %s(%s)\n", TOKEN_NAMES[token->type], token->value);
-    return;
+    int value = intValueOfToken(token);
+
+    // check operation
+    if (next_token->type == PLUS)
+    {
+      token = nextTokenIgnoreWhitespace(&parm);
+      value += intValueOfToken(token);
+    }
+    // create variable
+    createIntVariable(variable_name, value);
   }
 
   variables_dump();
+}
+
+int intValueOfToken(Token *token)
+{
+  if (token->type == NUMBER)
+  {
+    return parseNumber(token->value);
+  }
+  else if (token->type == IDENTIFIER)
+  {
+    Variable *v = getVariable(token->value);
+    return v->intValue;
+  }
+  // default to 0
+  return 0;
 }
 
 void kw_print(char *parm)
