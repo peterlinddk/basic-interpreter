@@ -1,6 +1,8 @@
 #ifndef KEYWORDS_H
 #define KEYWORDS_H
 
+#include "tokenizer.h"
+
 static const char *keywords[] = {"NEW", "LIST", "RUN", "END", "REM", "LET", "PRINT", "INPUT"};
 
 void kw_let(char *parameter);

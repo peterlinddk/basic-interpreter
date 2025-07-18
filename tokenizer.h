@@ -9,6 +9,7 @@ typedef enum
   IDENTIFIER,
   EQUALS,
   PLUS,
+  MINUS,
   END
 } TOKEN_TYPE;
 
@@ -20,6 +21,7 @@ static const char *TOKEN_NAMES[] = {
     "IDENTIFIER",
     "EQUALS",
     "PLUS",
+    "MINUS",
     "END"};
 
 typedef struct

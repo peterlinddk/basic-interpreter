@@ -91,6 +91,11 @@ Token *nextToken(char **text_ptr)
     token = &TOKEN_plus;
     (*text_ptr)++;
   }
+  else if (c == '-')
+  {
+    token = &TOKEN_minus;
+    (*text_ptr)++;
+  }
   else                        // identifier
   {
     token = tokenize_identifier(text_ptr);
@@ -191,7 +196,7 @@ Token *tokenize_identifier(char **text_ptr)
   {
     char c = **text_ptr;
     if(c == '\0') stopped = 1;
-    if(c == '=' || c == '\"' || c == '+') stopped = 1;
+    if(c == '=' || c == '\"' || c == '+' || c == '-') stopped = 1;
     if(c == ' ' && isdigit(*(*text_ptr+1))) stopped = 1;
 
     if(!stopped)
