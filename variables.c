@@ -12,7 +12,7 @@ void printVariable(Variable *v);
 
 void variables_dump()
 {
-  printf("Variables:\n");
+  printf("\nVariables:\n");
   for (int i = 0; i < variables_used; i++)
   {
     Variable *v = &variables[i];
