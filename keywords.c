@@ -65,12 +65,24 @@ void kw_let(char *parm)
   {
     int value = intValueOfToken(token);
 
-    // check operation
-    if (next_token->type == PLUS)
+    while(next_token->type != END)
     {
-      token = nextTokenIgnoreWhitespace(&parm);
-      value += intValueOfToken(token);
+      // get operation
+      Token *operation = next_token;
+
+      // and get next token
+      next_token = nextTokenIgnoreWhitespace(&parm);
+
+      if(operation->type == PLUS)
+      {
+        value += intValueOfToken(next_token);
+      } 
+      else if(operation->type == MINUS)
+      {
+        value -= intValueOfToken(next_token);
+      }
     }
+
     // create variable
     createIntVariable(variable_name, value);
   }
