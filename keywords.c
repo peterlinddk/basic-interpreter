@@ -36,58 +36,59 @@ void kw_let(char *parm)
   // get next token that isn't a whitespace
   token = nextTokenIgnoreWhitespace(&parm);
 
-  // and check if there is another token following that one (maybe a +)
-  Token *next_token = nextTokenIgnoreWhitespace(&parm);
+  char *variable_value = token->value;
 
-  // if not, then we behave as usual, and create a variable with a single value
-  if (next_token->type == END)
+  // Last token can be either string or number - or another identifier
+  if (token->type == STRING)
   {
-    char *variable_value = token->value;
-
-    // Last token can be either string or number - or another identifier
-    if (token->type == STRING)
+    createStringVariable(variable_name, variable_value);
+  }
+  else if (token->type == NUMBER)
+  {
+    createIntVariable(variable_name, calculateValue(token, &parm));
+  }
+  else if (token->type == IDENTIFIER)
+  {
+    // find the variable with this name
+    Variable *v = getVariable(variable_value);
+    // if variable is an int - calculate the value
+    if (v->type == VAR_TYPE_INTEGER)
     {
-      createStringVariable(variable_name, variable_value);
+      createIntVariable(variable_name, calculateValue(token, &parm));
     }
-    else if (token->type == NUMBER)
+    else
     {
-      createIntVariable(variable_name, parseNumber(variable_value));
-    }
-    else if (token->type == IDENTIFIER)
-    {
-      // find the variable with this name
-      Variable *v = getVariable(variable_value);
-      // and create a new of same type, with same value, but the name provided earlier
+      // create a new of same type, with same value, but the name provided earlier
       createVariable(*v, variable_name);
     }
   }
-  else // more tokens follow
-  {
-    int value = intValueOfToken(token);
-
-    while(next_token->type != END)
-    {
-      // get operation
-      Token *operation = next_token;
-
-      // and get next token
-      next_token = nextTokenIgnoreWhitespace(&parm);
-
-      if(operation->type == PLUS)
-      {
-        value += intValueOfToken(next_token);
-      } 
-      else if(operation->type == MINUS)
-      {
-        value -= intValueOfToken(next_token);
-      }
-    }
-
-    // create variable
-    createIntVariable(variable_name, value);
-  }
 
   variables_dump();
+}
+
+int calculateValue(Token *token, char **text_ptr)
+{
+  int value = intValueOfToken(token);
+  do
+  {
+    token = nextTokenIgnoreWhitespace(text_ptr);
+
+    if (token->type == PLUS || token->type == MINUS)
+    {
+      // an operation follows - find the token following that
+      Token *operation = token;
+      token = nextTokenIgnoreWhitespace(text_ptr);
+      if (operation->type == PLUS)
+      {
+        value += intValueOfToken(token);
+      }
+      else if (operation->type == MINUS)
+      {
+        value -= intValueOfToken(token);
+      }
+    }
+  } while (token->type != END);
+  return value;
 }
 
 int intValueOfToken(Token *token)

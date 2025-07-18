@@ -9,6 +9,7 @@ void kw_let(char *parameter);
 void kw_print(char *parameter);
 void kw_input(char *parameter);
 
+int calculateValue(Token *token, char **text_ptr);
 int intValueOfToken(Token *token);
 int parseNumber(char *str);
 
