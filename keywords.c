@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "tokenizer.h"
@@ -110,41 +111,55 @@ void kw_print(char *parm)
 {
   //  printf("PRINT %s\n", parm);
 
+  // Create string to print
+  char *string = malloc(255);
+
   Token *token = nextToken(&parm);
   while (token->type != END)
   {
     if (token->type == STRING)
     {
-      // print value
-      printf("%s", token->value);
+      // strcat(string, token->value);
+      sprintf(string, "%s%s", string, token->value);
     }
     else if (token->type == NUMBER)
     {
-      // print number value
-      printf("%s", token->value);
+      sprintf(string, "%s%d", string, intValueOfToken(token));
     }
     else if (token->type == IDENTIFIER)
     {
       // find variable with that name
       Variable *v = getVariable(token->value); // TODO: What if variable doesn't exist?
-      //- read it and print the value
-      switch (v->type)
+      if (v == NULL)
       {
-      case VAR_TYPE_STRING:
-        printf("%s", v->stringValue);
-        break;
-      case VAR_TYPE_INTEGER:
-        printf("%d", v->intValue);
-        break;
-      case VAR_TYPE_FLOAT:
-        printf("%f", v->floatValue);
-        break;
+        printf("ERROR - vairable '%s' does not exist!\n", token->value);
+      }
+      else
+      {
+        //- read it and print the value
+        switch (v->type)
+        {
+        case VAR_TYPE_STRING:
+          sprintf(string, "%s%s", string, v->stringValue);
+          break;
+        case VAR_TYPE_INTEGER:
+          sprintf(string, "%s%d", string, v->intValue);
+          break;
+        case VAR_TYPE_FLOAT:
+          sprintf(string, "%s%f", string, v->floatValue);
+          break;
+        }
       }
     }
     // other tokens are just ignored for now - meaning not printed at all
 
     token = nextToken(&parm);
   }
+
+  // finally, print the string
+  printf("\n%s", string); // NOTE: newline for test only - change later
+  // free string buffer again
+  free(string);
 }
 
 void kw_input(char *parm)
