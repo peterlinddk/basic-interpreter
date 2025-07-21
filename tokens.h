@@ -6,6 +6,8 @@
 Token TOKEN_equal = {.type = EQUALS, .value = "="};
 Token TOKEN_plus = {.type = PLUS, .value = "+"};
 Token TOKEN_minus = {.type = MINUS, .value = "-"};
+Token TOKEN_multiply = {.type = MULTIPLY, .value = "*"};
+Token TOKEN_divide = {.type = DIVIDE, .value = "/"};
 Token TOKEN_end = {.type = END, .value = "-end of tokens-"};
 
 #endif

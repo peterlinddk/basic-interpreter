@@ -60,8 +60,6 @@ Token *peekNextTokenIgnoreWhitespace(char **text_ptr)
   return token;
 }
 
-
-
 Token *nextTokenIgnoreWhitespace(char **text_ptr)
 {
   Token *token;
@@ -82,23 +80,23 @@ Token *nextToken(char **text_ptr)
 
   // check next character, and decide what kind of token it is
   char c = **text_ptr;
-  if (c == '\0')              // end of text
+  if (c == '\0') // end of text
   {
     token = &TOKEN_end; // use global end token
   }
-  else if (isspace(c))        // whitespace
+  else if (isspace(c)) // whitespace
   {
     token = tokenize_whitespace(text_ptr);
   }
-  else if (isdigit(c))        // number
+  else if (isdigit(c)) // number
   {
     token = tokenize_number(text_ptr);
   }
-  else if (c == '\"')         // string
+  else if (c == '\"') // string
   {
     token = tokenize_string(text_ptr);
   }
-  else if (c == '=')          // equal
+  else if (c == '=') // equal
   {
     // use global equal token
     token = &TOKEN_equal;
@@ -115,7 +113,17 @@ Token *nextToken(char **text_ptr)
     token = &TOKEN_minus;
     (*text_ptr)++;
   }
-  else                        // identifier
+  else if (c == '*')
+  {
+    token = &TOKEN_multiply;
+    (*text_ptr)++;
+  }
+  else if (c == '/')
+  {
+    token = &TOKEN_divide;
+    (*text_ptr)++;
+  }
+  else // identifier
   {
     token = tokenize_identifier(text_ptr);
   }
@@ -189,7 +197,7 @@ Token *tokenize_string(char **text_ptr)
       *val++ = escapeChar(*(*text_ptr)++);
     }
   }
-  // TODO: Maybe give an error or warning if string wasn't terminated with " ...  
+  // TODO: Maybe give an error or warning if string wasn't terminated with " ...
   // make sure to terminate the string
   *val = '\0';
   // and scroll past the last "
@@ -214,13 +222,16 @@ Token *tokenize_identifier(char **text_ptr)
   do
   {
     char c = **text_ptr;
-    if(c == '\0') stopped = 1;
-    if(c == '=' || c == '\"' || c == '+' || c == '-') stopped = 1;
-    if(c == ' ' && isdigit(*(*text_ptr+1))) stopped = 1;
+    if (c == '\0')
+      stopped = 1;
+    if (c == '=' || c == '\"' || c == '+' || c == '-' || c == '*' || c == '/')
+      stopped = 1;
+    if (c == ' ' && isdigit(*(*text_ptr + 1)))
+      stopped = 1;
 
-    if(!stopped)
+    if (!stopped)
       *val++ = *(*text_ptr)++;
-  } while(!stopped);
+  } while (!stopped);
 
   // remove trailing whitespace - if any
   while (isspace(*(val - 1)))

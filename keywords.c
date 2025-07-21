@@ -74,11 +74,11 @@ int calculateValue(Token *token, char **text_ptr)
 
   Token *operation = peekNextTokenIgnoreWhitespace(text_ptr);
 
-  while(operation->type == PLUS || operation->type == MINUS)
+  while (operation->type == PLUS || operation->type == MINUS || operation->type == MULTIPLY || operation->type == DIVIDE)
   {
     // actually consume token
     operation = nextTokenIgnoreWhitespace(text_ptr);
- 
+
     // an operation follows - find the token following that
     token = nextTokenIgnoreWhitespace(text_ptr);
     if (operation->type == PLUS)
@@ -89,9 +89,17 @@ int calculateValue(Token *token, char **text_ptr)
     {
       value -= intValueOfToken(token);
     }
+    else if (operation->type == MULTIPLY)
+    {
+      value *= intValueOfToken(token);
+    }
+    else if (operation->type == DIVIDE)
+    {
+      value /= intValueOfToken(token);
+    }
     // peek at next token
     operation = peekNextTokenIgnoreWhitespace(text_ptr);
-  } 
+  }
   return value;
 }
 
@@ -116,7 +124,7 @@ void kw_print(char *parm)
 
   // Create string to print
   char *string = malloc(255);
-  *string = '\0'; 
+  *string = '\0';
 
   Token *token = nextToken(&parm);
   while (token->type != END)
