@@ -43,6 +43,25 @@ TokenList *tokenize(char *text)
   return tokenlist;
 }
 
+Token *peekNextTokenIgnoreWhitespace(char **text_ptr)
+{
+  Token *token;
+
+  // create a new pointer to the same text
+  char *text = *text_ptr;
+
+  // skip whitespace
+  do
+  {
+    token = nextToken(&text);
+  } while (token->type == WHITESPACE);
+
+  // if the token is not a whitespace, return it
+  return token;
+}
+
+
+
 Token *nextTokenIgnoreWhitespace(char **text_ptr)
 {
   Token *token;

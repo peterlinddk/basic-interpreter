@@ -41,6 +41,7 @@ typedef struct
 TokenList *tokenize(char *line);
 void printToken(Token *token);
 Token *nextToken(char **line);
+Token *peekNextTokenIgnoreWhitespace(char **text_ptr);
 Token *nextTokenIgnoreWhitespace(char **text_ptr);
 Token *tokenize_whitespace(char **text);
 Token *tokenize_number(char **text_ptr);
