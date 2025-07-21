@@ -71,25 +71,27 @@ void kw_let(char *parm)
 int calculateValue(Token *token, char **text_ptr)
 {
   int value = intValueOfToken(token);
-  do
-  {
-    token = nextTokenIgnoreWhitespace(text_ptr);
 
-    if (token->type == PLUS || token->type == MINUS)
+  Token *operation = peekNextTokenIgnoreWhitespace(text_ptr);
+
+  while(operation->type == PLUS || operation->type == MINUS)
+  {
+    // actually consume token
+    operation = nextTokenIgnoreWhitespace(text_ptr);
+ 
+    // an operation follows - find the token following that
+    token = nextTokenIgnoreWhitespace(text_ptr);
+    if (operation->type == PLUS)
     {
-      // an operation follows - find the token following that
-      Token *operation = token;
-      token = nextTokenIgnoreWhitespace(text_ptr);
-      if (operation->type == PLUS)
-      {
-        value += intValueOfToken(token);
-      }
-      else if (operation->type == MINUS)
-      {
-        value -= intValueOfToken(token);
-      }
+      value += intValueOfToken(token);
     }
-  } while (token->type != END);
+    else if (operation->type == MINUS)
+    {
+      value -= intValueOfToken(token);
+    }
+    // peek at next token
+    operation = peekNextTokenIgnoreWhitespace(text_ptr);
+  } 
   return value;
 }
 
@@ -126,7 +128,7 @@ void kw_print(char *parm)
     }
     else if (token->type == NUMBER)
     {
-      sprintf(string, "%s%d", string, intValueOfToken(token));
+      sprintf(string, "%s%d", string, calculateValue(token, &parm));
     }
     else if (token->type == IDENTIFIER)
     {
@@ -145,7 +147,7 @@ void kw_print(char *parm)
           sprintf(string, "%s%s", string, v->stringValue);
           break;
         case VAR_TYPE_INTEGER:
-          sprintf(string, "%s%d", string, v->intValue);
+          sprintf(string, "%s%d", string, calculateValue(token, &parm));
           break;
         case VAR_TYPE_FLOAT:
           sprintf(string, "%s%f", string, v->floatValue);
