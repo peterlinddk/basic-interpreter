@@ -16,47 +16,26 @@ int main()
 
   do
   {
-    printf("ready.\n");
+    printf("\nready.\n");
     printf(">");
 
     fgets(inputline, 255, stdin);
     // remove last newline
     inputline[strlen(inputline) - 1] = '\0';
 
-    // check if the inputstring contains a keyword
+    // Tokenize input
     char *inp = inputline;
+    Token *token = nextTokenIgnoreWhitespace(&inp);
 
-    // ignore leading whitespace
-    while (*inp == ' ' || *inp == '\t')
-      inp++;
-
-    // compare input with each keyword in list
-    for (int kw = 0; kw < 8; kw++)
+    switch(token->type)
     {
-      if (startsWithIgnoreCase(inp, keywords[kw]))
-      {
-        printf("Recognized keyword: %s in %s\n", keywords[kw], inp);
-        switch (kw)
-        {
-        case 5:
-          kw_let(inp + strlen(keywords[kw]));
-          break;
-        case 6:
-          kw_print(inp + strlen(keywords[kw]));
-          break;
-        case 7:
-          kw_input(inp + strlen(keywords[kw]));
-
-        default:
-          break;
-        }
-
-        // don't look at any more keywords
-        break;
-      }
+      case KW_INPUT: kw_input(inp); break;
+      case KW_LET: kw_let(inp); break;
+      case KW_PRINT: kw_print(inp); break;
+      default:
+        printf("Unknown token type '%s' at beginning of line: '%s'\n", TOKEN_NAMES[token->type], inputline); 
     }
-
-    //    printf("You entered '%s'\n", inputline);
+    
   } while (!startsWithIgnoreCase(inputline, "QUIT"));
 
   return 0;

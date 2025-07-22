@@ -216,7 +216,7 @@ Token *tokenize_identifier(char **text_ptr)
   char string[255] = "";
   char *val = string;
   // An identifier can end in several ways:
-  // - with the end of the text, or if it meets any of these characters: = "
+  // - with the end of the text, or if it meets any of these characters: = " + - * / or a space
   // - if a digit follows a space, the identifier ended before the digit!
   int stopped = 0;
   do
@@ -224,7 +224,7 @@ Token *tokenize_identifier(char **text_ptr)
     char c = **text_ptr;
     if (c == '\0')
       stopped = 1;
-    if (c == '=' || c == '\"' || c == '+' || c == '-' || c == '*' || c == '/')
+    if (c == '=' || c == '\"' || c == '+' || c == '-' || c == '*' || c == '/' || c == ' ')
       stopped = 1;
     if (c == ' ' && isdigit(*(*text_ptr + 1)))
       stopped = 1;
@@ -240,9 +240,31 @@ Token *tokenize_identifier(char **text_ptr)
   }
   // make sure to terminate the string
   *val = '\0';
+
+  // check if identifier is keyword
+  token->type = matchKeywordToken(string);
   token->value = strdup(string);
 
   return token;
+}
+
+/* returns either IDENTIFIER, or KEYWORD TOKEN*/
+TOKEN_TYPE matchKeywordToken(char *identifier)
+{
+  if (strncasecmp(identifier, "INPUT", 6) == 0)
+  {
+    return KW_INPUT;
+  }
+  else if (strncasecmp(identifier, "LET", 4) == 0)
+  {
+    return KW_LET;
+  }
+  else if (strncasecmp(identifier, "PRINT", 6) == 0)
+  {
+    return KW_PRINT;
+  }
+
+  return IDENTIFIER;
 }
 
 char escapeChar(char c)

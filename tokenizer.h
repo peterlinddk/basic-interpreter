@@ -7,6 +7,9 @@ typedef enum
   NUMBER,
   STRING,
   IDENTIFIER,
+  KW_INPUT,
+  KW_LET,
+  KW_PRINT,
   EQUALS,
   PLUS,
   MINUS,
@@ -21,6 +24,9 @@ static const char *TOKEN_NAMES[] = {
     "NUMBER",
     "STRING",
     "IDENTIFIER",
+    "KW_INPUT",
+    "KW_LET",
+    "KW_PRINT",
     "EQUALS",
     "PLUS",
     "MINUS",
@@ -51,6 +57,7 @@ Token *tokenize_whitespace(char **text);
 Token *tokenize_number(char **text_ptr);
 Token *tokenize_string(char **text);
 Token *tokenize_identifier(char **text);
+TOKEN_TYPE matchKeywordToken(char* identifier);
 
 char escapeChar(char c);
 
