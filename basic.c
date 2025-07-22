@@ -29,6 +29,7 @@ int main()
 
     switch(token->type)
     {
+      case IDENTIFIER: assign_variable(token, inp); break;
       case KW_INPUT: kw_input(inp); break;
       case KW_LET: kw_let(inp); break;
       case KW_PRINT: kw_print(inp); break;

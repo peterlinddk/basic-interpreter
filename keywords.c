@@ -7,6 +7,53 @@
 #include "variables.h"
 #include "keywords.h"
 
+void assign_variable(Token *token, char *parm)
+{
+  // Find variable with the name of this token
+  Variable *v = getVariable(token->value);
+  if (v == NULL)
+  {
+    printf("ERROR - vairable '%s' does not exist!\n", token->value);
+  }
+  else
+  {
+    // assume that the next token is an equals
+    token = nextTokenIgnoreWhitespace(&parm);
+
+    if (token->type != EQUALS)
+    {
+      printf("SYNTAX ERROR - missing equals after identifier\n");
+      return;
+    }
+
+    // next token is the value being set
+    token = nextTokenIgnoreWhitespace(&parm);
+
+    char *variable_value = token->value;
+    if (token->type == STRING)
+    {
+      writeStringVariable(v->name, variable_value);
+    }
+    else if (token->type == NUMBER)
+    {
+      writeIntVariable(v->name, calculateValue(token, &parm));
+    }
+    else if (token->type == IDENTIFIER)
+    {
+      if (v->type == VAR_TYPE_INTEGER)
+      {
+        writeIntVariable(v->name, calculateValue(token, &parm));
+      }
+      else if (v->type == VAR_TYPE_STRING)
+      {
+        Variable *v2 = getVariable(token->value);
+        writeStringVariable(v->name, v2->stringValue);
+      }
+    }
+  }
+  variables_dump();
+}
+
 void kw_let(char *parm)
 {
   printf("LET %s\n", parm);
