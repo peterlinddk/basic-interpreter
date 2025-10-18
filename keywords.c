@@ -6,6 +6,7 @@
 #include "tokenizer.h"
 #include "variables.h"
 #include "keywords.h"
+#include "lines.h"
 
 void assign_variable(Token *token, char *parm)
 {
@@ -113,6 +114,20 @@ void kw_let(char *parm)
   }
 
   variables_dump();
+}
+
+extern Line *first_line;
+
+void kw_list(char *parm)
+{
+  printf("\n");
+  // ignore parameters, just list the program - if it exists
+  Line *current = first_line;
+  while (current != NULL)
+  {
+    printf("%d %s\n", current->line_number, current->line_text);
+    current = current->next;
+  }
 }
 
 int calculateValue(Token *token, char **text_ptr)

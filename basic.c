@@ -34,6 +34,7 @@ int main()
       case IDENTIFIER: assign_variable(token, inp); break;
       case KW_INPUT: kw_input(inp); break;
       case KW_LET: kw_let(inp); break;
+      case KW_LIST: kw_list(inp); break;
       case KW_PRINT: kw_print(inp); break;
       default:
         printf("Unknown token type '%s' at beginning of line: '%s'\n", TOKEN_NAMES[token->type], inputline); 

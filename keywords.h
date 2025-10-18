@@ -5,6 +5,7 @@
 
 void assign_variable(Token *token, char *parm);
 void kw_let(char *parameter);
+void kw_list(char *parm);
 void kw_print(char *parameter);
 void kw_input(char *parameter);
 

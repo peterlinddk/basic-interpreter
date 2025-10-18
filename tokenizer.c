@@ -259,6 +259,10 @@ TOKEN_TYPE matchKeywordToken(char *identifier)
   {
     return KW_LET;
   }
+  else if (strncasecmp(identifier, "LIST", 5) == 0)
+  {
+    return KW_LIST;
+  }
   else if (strncasecmp(identifier, "PRINT", 6) == 0)
   {
     return KW_PRINT;
