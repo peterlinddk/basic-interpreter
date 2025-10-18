@@ -6,6 +6,7 @@
 #include "keywords.h"
 #include "variables.h"
 #include "tokenizer.h"
+#include "lines.h"
 
 int startsWithIgnoreCase(char *string, const char *word);
 
@@ -29,6 +30,7 @@ int main()
 
     switch(token->type)
     {
+      case NUMBER: create_line(token, inp); break;
       case IDENTIFIER: assign_variable(token, inp); break;
       case KW_INPUT: kw_input(inp); break;
       case KW_LET: kw_let(inp); break;
