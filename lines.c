@@ -30,14 +30,55 @@ void create_line(Token *token, char *inp)
   }
   else
   {
-    // find the last line
-    Line *lastline = first_line;
-    while (lastline->next != NULL)
+    // the new line is either:
+    // - added after the last line | if line_number is greater than any line
+    // - replacing an existing line | if line_number exists
+
+    // look at the current line
+    Line *current_line = first_line;
+    // remember the previous line looked at
+    Line *previous_line = NULL;
+
+    while (current_line != NULL)
     {
-      lastline = lastline->next;
-    }
-    // and make that point to this line
-    lastline->next = line;
+      // if the new line number matches - replace it
+      if (line->line_number == current_line->line_number)
+      {
+        Line *replaced_line = current_line;
+        // make the previous line point to this line
+        // if it was NULL, the first line is replaced
+        if (previous_line == NULL)
+        {
+          first_line = line;
+        }
+        else
+        {
+          previous_line->next = line;
+        }
+        // and point onwards to the next line
+        line->next = replaced_line->next;
+        // finally, free the old replaced line and its' text
+        free(replaced_line->line_text);
+        free(replaced_line);
+
+        // and we are done - end the loop
+        break;
+      }
+      // if this was the last line - and the line_number is greater, add this one to the end
+      else if (current_line->next == NULL) // line->line_number > current_line->line_number && 
+      {
+        current_line->next = line;
+
+        // and we are done - end the loop
+        break;
+      }
+
+      // remember the previous line
+      previous_line = current_line;
+      // and go on to the next one
+      current_line = current_line->next;
+    };
+
   }
 
   printf("Created a new line %d\n", line_number);
