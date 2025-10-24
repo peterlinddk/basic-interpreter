@@ -33,6 +33,7 @@ void create_line(Token *token, char *inp)
     // the new line is either:
     // - added after the last line | if line_number is greater than any line
     // - replacing an existing line | if line_number exists
+    // - inserted before an existing line | if line_number is less than ...
 
     // look at the current line
     Line *current_line = first_line;
@@ -65,7 +66,27 @@ void create_line(Token *token, char *inp)
         break;
       }
       // if this was the last line - and the line_number is greater, add this one to the end
-      else if (current_line->next == NULL) // line->line_number > current_line->line_number && 
+
+      // if the new line is before the current one - insert it before
+      else if (line->line_number < current_line->line_number)
+      {
+        // make the previous line point to this
+        // if it was NULL, the first line is 'inserted'
+        if (previous_line == NULL)
+        {
+          first_line = line;
+        }
+        else
+        {
+          previous_line->next = line;
+        }
+        // and make this point on to the current line
+        line->next = current_line;
+
+        // and we are done - end the loop
+        break;
+      }
+      else if (current_line->next == NULL) // line->line_number > current_line->line_number &&
       {
         current_line->next = line;
 
@@ -78,7 +99,6 @@ void create_line(Token *token, char *inp)
       // and go on to the next one
       current_line = current_line->next;
     };
-
   }
 
   printf("Created a new line %d\n", line_number);
