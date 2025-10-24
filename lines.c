@@ -12,6 +12,47 @@ void initialize_program()
   first_line = NULL;
 }
 
+void delete_line(Token *token)
+{
+  int line_number = parseNumber(token->value);
+  printf("Delete line %d", line_number);
+
+  Line *current_line = first_line;
+  // remember the previous line looked at
+  Line *previous_line = NULL;
+
+  while (current_line != NULL)
+  {
+    // if the new line number matches - delete it
+    if (line_number == current_line->line_number)
+    {
+      Line *deleted_line = current_line;
+      // make the previous line point to the next line
+      // if it was NULL, the first line is replaced
+      if(previous_line == NULL) 
+      {
+        first_line = deleted_line->next;
+      }
+      else 
+      {
+        previous_line->next = deleted_line->next;
+      }
+
+      // finally, free the old replaced line and its' text
+      free(deleted_line->line_text);
+      free(deleted_line);
+
+      // and we are done - end the loop
+      break;
+    }
+
+    // remember the previous line
+    previous_line = current_line;
+    // and go on to the next one
+    current_line = current_line->next;
+  }
+}
+
 void create_line(Token *token, char *inp)
 {
   int line_number = parseNumber(token->value);

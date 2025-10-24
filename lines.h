@@ -12,5 +12,6 @@ struct Line {
 };
 
 void create_line(Token *token, char* inp);
+void delete_line(Token *token);
 
 #endif
